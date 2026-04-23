@@ -15,6 +15,8 @@ const playBtn = document.getElementById('btn-play');
 const resetBtn = document.getElementById('btn-reset');
 const statusText = document.getElementById('status-text');
 const modeBtns = document.querySelectorAll('.mode-btn');
+const btnPlus = document.getElementById('btn-plus');
+const btnMinus = document.getElementById('btn-minus');
 
 // Background Orbs
 const orb1 = document.querySelector('.orb-1');
@@ -120,9 +122,21 @@ function setMode(modeName) {
     resetTimer();
 }
 
+function adjustTime(amount) {
+    if (isRunning) return; // Do not allow adjustment while timer is running
+    const newTime = currentMode.time + amount;
+    if (newTime >= 60) { // Minimum 1 minute
+        currentMode.time = newTime;
+        timeLeft = newTime;
+        updateDisplay();
+    }
+}
+
 // Event Listeners
 playBtn.addEventListener('click', toggleTimer);
 resetBtn.addEventListener('click', resetTimer);
+btnPlus.addEventListener('click', () => adjustTime(60));
+btnMinus.addEventListener('click', () => adjustTime(-60));
 
 document.getElementById('btn-pomodoro').addEventListener('click', () => setMode('POMODORO'));
 document.getElementById('btn-shortbreak').addEventListener('click', () => setMode('SHORT_BREAK'));

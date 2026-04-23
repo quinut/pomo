@@ -151,6 +151,13 @@ body {
 }
 
 /* Timer Display */
+.timer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .timer-display {
     font-family: 'Outfit', sans-serif;
     font-size: 7rem;
@@ -159,6 +166,38 @@ body {
     text-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     line-height: 1;
     color: white;
+}
+
+/* Time Adjust */
+.time-adjust {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.adjust-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.adjust-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: scale(1.1);
+}
+
+.adjust-btn:active {
+    transform: scale(0.95);
 }
 
 /* Controls */
