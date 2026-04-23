@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphism Pomodoro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="glass-container">
+        <div class="mode-selector">
+            <button id="btn-pomodoro" class="mode-btn active">Pomodoro</button>
+            <button id="btn-shortbreak" class="mode-btn">Short Break</button>
+            <button id="btn-longbreak" class="mode-btn">Long Break</button>
+        </div>
+
+        <div class="timer-display">
+            <span id="time-left">25:00</span>
+        </div>
+
+        <div class="controls">
+            <button id="btn-play" class="control-btn play-btn">
+                <i class="ri-play-fill"></i>
+            </button>
+            <button id="btn-reset" class="control-btn reset-btn">
+                <i class="ri-refresh-line"></i>
+            </button>
+        </div>
+        
+        <div class="settings-hint">
+            <p id="status-text">Ready to focus?</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
