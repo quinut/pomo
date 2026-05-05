@@ -286,3 +286,136 @@ body {
         font-size: 2rem;
     }
 }
+
+/* Login Overlay */
+.glass-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.login-modal {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 30px;
+    padding: 3rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.login-modal h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+.login-modal p { color: var(--text-secondary); margin-bottom: 1rem; }
+
+.auth-btn {
+    padding: 1rem;
+    border-radius: 15px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    color: white;
+}
+
+.auth-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+.google-btn { background: #ea4335; }
+.discord-btn { background: #5865F2; }
+.guest-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); }
+
+/* Online Sidebar */
+.online-sidebar {
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+    width: 250px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 1.5rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 { font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.icon-btn:hover { color: white; }
+
+#online-users-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.user-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; justify-content: center; align-items: center;
+    font-weight: bold; overflow: hidden; flex-shrink: 0;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.user-info { display: flex; flex-direction: column; font-size: 0.9rem; overflow: hidden; }
+.user-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-status { font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.status-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-indicator.POMODORO { background: var(--primary-color); }
+.status-indicator.SHORT_BREAK { background: var(--secondary-color); }
+.status-indicator.LONG_BREAK { background: var(--tertiary-color); }
+
+@media (max-width: 800px) {
+    .online-sidebar {
+        position: relative; right: 0; top: 0;
+        width: 90%; max-width: 500px;
+        margin-top: 2rem;
+    }
+    body { flex-direction: column; justify-content: flex-start; padding: 2rem 0; overflow-y: auto;}
+    .background { position: fixed; }
+}

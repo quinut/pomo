@@ -9,12 +9,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="background">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="glass-overlay">
+        <div class="login-modal">
+            <h2>Focus Together</h2>
+            <p>Sign in to see your friends' timer state.</p>
+            <button id="btn-login-google" class="auth-btn google-btn"><i class="ri-google-fill"></i> Continue with Google</button>
+            <button id="btn-login-discord" class="auth-btn discord-btn"><i class="ri-discord-fill"></i> Continue with Discord</button>
+            <button id="btn-continue-guest" class="auth-btn guest-btn">Continue as Guest</button>
+        </div>
+    </div>
+
+    <!-- Online Friends Sidebar -->
+    <div class="online-sidebar glass-panel">
+        <div class="sidebar-header">
+            <h3><i class="ri-group-line"></i> Online</h3>
+            <button id="btn-logout" class="icon-btn" title="Sign Out" style="display: none;"><i class="ri-logout-box-r-line"></i></button>
+        </div>
+        <ul id="online-users-list">
+            <!-- Users will be populated here -->
+        </ul>
     </div>
 
     <div class="glass-container">
