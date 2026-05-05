@@ -149,7 +149,7 @@ btnCloseLogin.addEventListener('click', () => {
 btnMockLogin.addEventListener('click', async () => {
     const username = usernameInput.value.trim() || 'Guest';
     try {
-        const response = await fetch('http://localhost:3000/api/mock-login', {
+        const response = await fetch('/api/mock-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username })
@@ -177,7 +177,8 @@ btnLogout.addEventListener('click', () => {
 function initRealtime() {
     if (ws) return;
 
-    ws = new WebSocket('ws://localhost:3000/ws');
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
     ws.onopen = () => {
         console.log('Connected to WebSocket server');

@@ -12,6 +12,13 @@ interface UserState {
 
 const users = new Map<string, UserState>();
 
+const getBaseUrl = (request: Request) => {
+  const url = new URL(request.url);
+  const protocol = request.headers.get('x-forwarded-proto') || (url.hostname === 'localhost' ? 'http' : 'https');
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || url.host;
+  return `${protocol}://${host}`;
+};
+
 // Helper function to render callback HTML
 const renderCallbackHtml = (userData: any) => `
 <!DOCTYPE html>
@@ -53,22 +60,24 @@ const app = new Elysia()
 
   // --- GOOGLE OAUTH ---
   .group("/api/auth/google", (app) => app
-    .get("/login", ({ set }) => {
+    .get("/login", ({ request, set }) => {
       const clientId = Bun.env.GOOGLE_CLIENT_ID;
       if (!clientId || clientId === 'your_google_client_id_here') {
           return new Response("Google Client ID not configured in .env", { status: 500 });
       }
-      const redirectUri = encodeURIComponent("http://localhost:3000/api/auth/google/callback");
+      const baseUrl = getBaseUrl(request);
+      const redirectUri = encodeURIComponent(`${baseUrl}/api/auth/google/callback`);
       const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=profile email`;
       set.redirect = url;
     })
-    .get("/callback", async ({ query }) => {
+    .get("/callback", async ({ request, query }) => {
       const { code } = query;
       if (!code) return new Response("No code provided", { status: 400 });
 
       const clientId = Bun.env.GOOGLE_CLIENT_ID!;
       const clientSecret = Bun.env.GOOGLE_CLIENT_SECRET!;
-      const redirectUri = "http://localhost:3000/api/auth/google/callback";
+      const baseUrl = getBaseUrl(request);
+      const redirectUri = `${baseUrl}/api/auth/google/callback`;
 
       try {
         // Exchange code for token
@@ -110,22 +119,24 @@ const app = new Elysia()
 
   // --- DISCORD OAUTH ---
   .group("/api/auth/discord", (app) => app
-    .get("/login", ({ set }) => {
+    .get("/login", ({ request, set }) => {
       const clientId = Bun.env.DISCORD_CLIENT_ID;
       if (!clientId || clientId === 'your_discord_client_id_here') {
           return new Response("Discord Client ID not configured in .env", { status: 500 });
       }
-      const redirectUri = encodeURIComponent("http://localhost:3000/api/auth/discord/callback");
+      const baseUrl = getBaseUrl(request);
+      const redirectUri = encodeURIComponent(`${baseUrl}/api/auth/discord/callback`);
       const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify`;
       set.redirect = url;
     })
-    .get("/callback", async ({ query }) => {
+    .get("/callback", async ({ request, query }) => {
       const { code } = query;
       if (!code) return new Response("No code provided", { status: 400 });
 
       const clientId = Bun.env.DISCORD_CLIENT_ID!;
       const clientSecret = Bun.env.DISCORD_CLIENT_SECRET!;
-      const redirectUri = "http://localhost:3000/api/auth/discord/callback";
+      const baseUrl = getBaseUrl(request);
+      const redirectUri = `${baseUrl}/api/auth/discord/callback`;
 
       try {
         // Exchange code for token
