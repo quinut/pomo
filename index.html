@@ -25,8 +25,8 @@
             <p>Sign in to see your friends' timer state.</p>
             <input type="text" id="username-input" placeholder="Enter your name..." style="padding: 1rem; border-radius: 15px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; outline: none; font-family: 'Inter', sans-serif; font-size: 1rem; text-align: center;">
             <button id="btn-mock-login" class="auth-btn" style="background: var(--primary-color);">Join Session</button>
-            <button id="btn-login-google" class="auth-btn google-btn" onclick="alert('Google OAuth requires backend configuration.')"><i class="ri-google-fill"></i> Continue with Google</button>
-            <button id="btn-login-discord" class="auth-btn discord-btn" onclick="alert('Discord OAuth requires backend configuration.')"><i class="ri-discord-fill"></i> Continue with Discord</button>
+            <button id="btn-login-google" class="auth-btn google-btn" onclick="window.location.href='/api/auth/google/login'"><i class="ri-google-fill"></i> Continue with Google</button>
+            <button id="btn-login-discord" class="auth-btn discord-btn" onclick="window.location.href='/api/auth/discord/login'"><i class="ri-discord-fill"></i> Continue with Discord</button>
         </div>
     </div>
 
