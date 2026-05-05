@@ -18,149 +18,212 @@ const modeBtns = document.querySelectorAll('.mode-btn');
 const btnPlus = document.getElementById('btn-plus');
 const btnMinus = document.getElementById('btn-minus');
 
-// New DOM Elements for Auth & Realtime
+// Auth & Realtime Elements
 const loginOverlay = document.getElementById('login-overlay');
-const btnLoginGoogle = document.getElementById('btn-login-google');
-const btnLoginDiscord = document.getElementById('btn-login-discord');
-const btnContinueGuest = document.getElementById('btn-continue-guest');
+const btnCloseLogin = document.getElementById('btn-close-login');
+const btnShowLogin = document.getElementById('btn-show-login');
+const btnMockLogin = document.getElementById('btn-mock-login');
+const usernameInput = document.getElementById('username-input');
 const btnLogout = document.getElementById('btn-logout');
 const onlineUsersList = document.getElementById('online-users-list');
+
+// Todo Elements
+const todoInput = document.getElementById('todo-input');
+const btnAddTodo = document.getElementById('btn-add-todo');
+const todoList = document.getElementById('todo-list');
+const btnClearTodos = document.getElementById('btn-clear-todos');
 
 // Background Orbs
 const orb1 = document.querySelector('.orb-1');
 const orb2 = document.querySelector('.orb-2');
 
-// Supabase Initialization
-const supabaseUrl = 'https://svadigbmwialurcwqeho.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2YWRpZ2Jtd2lhbHVyY3dxZWhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTQ1NDgsImV4cCI6MjA5MzUzMDU0OH0.Oc2phuXm8Ks1FsNojQ0JS2EAxfsmaiHZVcAVJPjIeUs';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
 let currentUser = null;
-let realtimeChannel = null;
+let ws = null;
 
-// Initialization & Auth Flow
-async function init() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        currentUser = session.user;
+function updateAuthState() {
+    if (currentUser) {
         loginOverlay.style.display = 'none';
-        btnLogout.style.display = 'block';
+        btnShowLogin.style.display = 'none';
+        btnLogout.style.display = 'inline-block';
         initRealtime();
     } else {
-        // Show login overlay
-        loginOverlay.style.display = 'flex';
+        btnShowLogin.style.display = 'inline-block';
         btnLogout.style.display = 'none';
-    }
-
-    // Auth Event Listener
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-            currentUser = session.user;
-            loginOverlay.style.display = 'none';
-            btnLogout.style.display = 'block';
-            initRealtime();
-        } else if (event === 'SIGNED_OUT') {
-            currentUser = null;
-            loginOverlay.style.display = 'flex';
-            btnLogout.style.display = 'none';
-            if (realtimeChannel) {
-                realtimeChannel.unsubscribe();
-                realtimeChannel = null;
-            }
-            renderOnlineUsers({});
+        if (ws) {
+            ws.close();
+            ws = null;
         }
-    });
+        renderOnlineUsers([]);
+    }
+}
 
+// Initialization
+function init() {
+    // Check if user is in localStorage
+    const savedUser = localStorage.getItem('pomodoroUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+    }
+    
+    updateAuthState();
     updateDisplay();
     updateBackgroundColors(currentMode);
+    loadTodos();
 }
 
-// Auth Handlers
-async function signInWithProvider(provider) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-            redirectTo: window.location.origin
-        }
+// Todo Logic
+let todos = [];
+
+function loadTodos() {
+    const savedTodos = localStorage.getItem('pomodoroTodos');
+    if (savedTodos) {
+        todos = JSON.parse(savedTodos);
+    }
+    renderTodos();
+}
+
+function saveTodos() {
+    localStorage.setItem('pomodoroTodos', JSON.stringify(todos));
+}
+
+function renderTodos() {
+    todoList.innerHTML = '';
+    todos.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        
+        li.innerHTML = `
+            <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
+            <span class="todo-text">${todo.text}</span>
+            <button class="todo-delete"><i class="ri-close-line"></i></button>
+        `;
+
+        const checkbox = li.querySelector('.todo-checkbox');
+        checkbox.addEventListener('change', () => {
+            todos[index].completed = checkbox.checked;
+            saveTodos();
+            renderTodos();
+        });
+
+        const deleteBtn = li.querySelector('.todo-delete');
+        deleteBtn.addEventListener('click', () => {
+            todos.splice(index, 1);
+            saveTodos();
+            renderTodos();
+        });
+
+        todoList.appendChild(li);
     });
-    if (error) console.error('Login error:', error.message);
 }
 
-btnLoginGoogle.addEventListener('click', () => signInWithProvider('google'));
-btnLoginDiscord.addEventListener('click', () => signInWithProvider('discord'));
+function addTodo() {
+    const text = todoInput.value.trim();
+    if (text) {
+        todos.push({ text, completed: false });
+        todoInput.value = '';
+        saveTodos();
+        renderTodos();
+    }
+}
 
-btnContinueGuest.addEventListener('click', () => {
-    loginOverlay.style.display = 'none';
-    currentUser = { id: 'guest-' + Math.random().toString(36).substring(7), user_metadata: { full_name: 'Guest' } };
-    initRealtime();
+btnAddTodo.addEventListener('click', addTodo);
+todoInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTodo();
 });
 
-btnLogout.addEventListener('click', async () => {
-    if (currentUser && !currentUser.id.startsWith('guest-')) {
-        await supabase.auth.signOut();
-    } else {
-        currentUser = null;
-        loginOverlay.style.display = 'flex';
-        btnLogout.style.display = 'none';
-        if (realtimeChannel) {
-            realtimeChannel.unsubscribe();
-            realtimeChannel = null;
+btnClearTodos.addEventListener('click', () => {
+    todos = todos.filter(t => !t.completed);
+    saveTodos();
+    renderTodos();
+});
+
+// Auth Handlers
+btnShowLogin.addEventListener('click', () => {
+    loginOverlay.style.display = 'flex';
+});
+
+btnCloseLogin.addEventListener('click', () => {
+    loginOverlay.style.display = 'none';
+});
+
+btnMockLogin.addEventListener('click', async () => {
+    const username = usernameInput.value.trim() || 'Guest';
+    try {
+        const response = await fetch('http://localhost:3000/api/mock-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        const data = await response.json();
+        if (data.success) {
+            currentUser = data.user;
+            localStorage.setItem('pomodoroUser', JSON.stringify(currentUser));
+            loginOverlay.style.display = 'none';
+            updateAuthState();
         }
-        renderOnlineUsers({});
+    } catch (e) {
+        console.error('Login failed. Is the server running?', e);
+        alert('Could not connect to the backend server. Make sure it is running on port 3000.');
     }
 });
 
-// Realtime Presence
+btnLogout.addEventListener('click', () => {
+    currentUser = null;
+    localStorage.removeItem('pomodoroUser');
+    updateAuthState();
+});
+
+// Realtime Presence via Native WebSocket
 function initRealtime() {
-    if (realtimeChannel) return;
+    if (ws) return;
 
-    realtimeChannel = supabase.channel('pomodoro-room', {
-        config: {
-            presence: {
-                key: currentUser.id,
-            },
-        },
-    });
+    ws = new WebSocket('ws://localhost:3000/ws');
 
-    realtimeChannel
-        .on('presence', { event: 'sync' }, () => {
-            const newState = realtimeChannel.presenceState();
-            renderOnlineUsers(newState);
-        })
-        .subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                broadcastState();
+    ws.onopen = () => {
+        console.log('Connected to WebSocket server');
+        broadcastState('join');
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'presence') {
+                renderOnlineUsers(data.payload);
             }
-        });
+        } catch (e) {
+            console.error('Error parsing WebSocket message', e);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('Disconnected from WebSocket server');
+        ws = null;
+        // Optionally try to reconnect here
+    };
 }
 
-async function broadcastState() {
-    if (!realtimeChannel || !currentUser) return;
+function broadcastState(eventType = 'sync') {
+    if (!ws || ws.readyState !== WebSocket.OPEN || !currentUser) return;
     
     const statusData = {
-        name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || 'Anonymous',
-        avatar_url: currentUser.user_metadata?.avatar_url || null,
+        id: currentUser.id,
+        name: currentUser.name,
+        avatar_url: currentUser.avatar_url,
         mode: currentMode.key,
         isRunning: isRunning,
         timeLeft: timeLeft
     };
 
-    await realtimeChannel.track(statusData);
+    ws.send(JSON.stringify({
+        type: eventType,
+        payload: statusData
+    }));
 }
 
-function renderOnlineUsers(presenceState) {
+function renderOnlineUsers(users) {
     onlineUsersList.innerHTML = '';
     
-    // Convert presence state object to array of users
-    const users = [];
-    for (const [key, presences] of Object.entries(presenceState)) {
-        if (presences.length > 0) {
-            // Include user ID to avoid duplicates and map accurately
-            users.push({ id: key, ...presences[0] });
-        }
-    }
-
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
         onlineUsersList.innerHTML = '<li style="color: var(--text-secondary); text-align: center; font-size: 0.9rem;">No one is online right now.</li>';
         return;
     }
@@ -260,10 +323,6 @@ function startTimer() {
         timeLeft--;
         updateDisplay();
         
-        // Broadcast every 10 seconds to keep clients roughly in sync with time left, or let them compute.
-        // For simplicity and to save quota, we won't broadcast every second. The mode/isRunning is enough.
-        // If we want exact time sync, we could broadcast periodically.
-        
         if (timeLeft <= 0) {
             stopTimer();
             notifyUser(`${currentMode.text} time is up!`);
@@ -301,7 +360,7 @@ function setMode(modeName) {
     statusText.textContent = currentMode.text;
     updateBackgroundColors(currentMode);
     
-    resetTimer(); // Reset timer also calls broadcastState
+    resetTimer(); 
 }
 
 function adjustTime(amount) {
